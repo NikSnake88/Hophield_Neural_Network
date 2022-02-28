@@ -4,7 +4,7 @@ from PIL import Image
 import math
 
 image_number = 0
-alpha = 0.1
+alpha = 0.15
 
 def readImage(imageO):
     imageM = np.zeros((80,80))
@@ -31,6 +31,7 @@ def pner(v, img):
     n = 0
     for i, row in enumerate(img):
         for j, value in enumerate(row):
+            #if value != 1:
             n += value * v[i, j]
     return n
 
