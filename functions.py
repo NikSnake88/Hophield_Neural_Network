@@ -37,15 +37,19 @@ def pner(v, img):
 
 
 def activation(x):
-    f = 1/(1+math.exp(-x))
-    return f
+    if x > 0:
+        return 1
+    else: 
+        return 0
+   # f = 1/(1+math.exp(-x))
+   # return f
 
-def corr(np, na, cv, img, ves):
-    delta = na - cv
-    deriv = na*(1 - na) # производная ф-и активации сигмоиды
+def corr(na, cv, img, ves):
+    delta = cv - na
     for i, row in enumerate(img):
         for j, value in enumerate(row):
-            ves[i, j] -= alpha * 2 * delta * deriv * img[i, j]
+            if value != 0:
+                ves[i, j] += alpha * delta * img[i, j]
     
     
 def saveImg(m):
