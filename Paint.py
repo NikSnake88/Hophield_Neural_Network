@@ -3,24 +3,30 @@ import PIL
 from PIL import Image, ImageDraw
 import functions as fn
 import numpy as np
+import Adam as a
 
+neurons = [a.Neuron(80,80) for i in range(10)]
 
-with open("Vesi.txt", "r") as file:
-    vesa = np.genfromtxt('Vesi.txt', delimiter=' ')
+for i in range(10):
+    neurons[i].vread(str(i) +'_V.txt')
 
 def start():
+    ansver = [0 for k in range(2)] 
     imageM = np.zeros((80,80))
     image = image1.resize((80, 80), PIL.Image.ANTIALIAS)
     for i in range(image.size[0]):
         for j in range(image.size[1]):
             (x, y, z) = image.load()[i, j]
             imageM[i, j] = round((x*y*z / 2**24), 1)
-    neuron = fn.pner(vesa, imageM)
-    activ = fn.activation(neuron)
-    if activ > 0.9:
-        print('Это крест')
-    else: print('Это не крест')
-    return image1
+    for i in range(10):
+        neuron = neurons[i].sum(imageM)
+        activ = neurons[i].activation(neuron)
+        if activ > ansver[1]:
+            ansver[0] = i
+            ansver[1] = activ
+    
+    print('Это ' + str(ansver[0]))
+    return image
 
 def saveX():
     global image_number
