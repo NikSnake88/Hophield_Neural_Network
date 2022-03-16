@@ -4,7 +4,7 @@ import numpy as np
 import os
 
 class iImg():
-    def __init__(self, path) -> None:
+    def __init__(self, path):
         self.shape = int(path[-5])
         self.matrx = fn.readImage(path)
 
@@ -18,9 +18,7 @@ neurons = [a.Neuron(80,80) for i in range(10)]
 for i in range(10):
     neurons[i].vread(str(i) +'_V.txt')
 
-imgs = []
-for imgName in imagePaths:
-    imgs.append(iImg(imageDir + imgName))
+imgs = [iImg(imageDir + imgName) for imgName in imagePaths]
 print("Imgs download: success")
 
 loops = 0
