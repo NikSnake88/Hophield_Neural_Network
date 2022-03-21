@@ -1,4 +1,5 @@
 # from email.mime import image
+from operator import index
 import numpy as np
 from PIL import Image 
 
@@ -17,10 +18,9 @@ def readImage(path):
 
 def corr(na, cv, img, ves):
     delta = cv - na
-    for i, row in enumerate(img):
-        for j, value in enumerate(row):
-            if value != 0:
-                ves[i, j] += alpha * delta * img[i, j]
+    for idx, value in np.ndenumerate(img):
+        if value != 0:
+            ves[idx] += alpha * delta * value
 
 def saveImg(m):
     global image_number

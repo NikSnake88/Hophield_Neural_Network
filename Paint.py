@@ -5,7 +5,7 @@ import functions as fn
 import numpy as np
 import Adam as a
 
-neurons = [a.Neuron(80,80) for i in range(10)]
+neurons = [a.Neuron(80,80, i) for i in range(10)]
 
 for i in range(10):
     neurons[i].vread(str(i) +'_V.txt')

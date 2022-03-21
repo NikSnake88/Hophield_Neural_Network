@@ -1,7 +1,11 @@
+from turtle import shape
 import functions as fn
 import Adam as a
 import numpy as np
 import os
+import time
+
+start = time.time()
 
 class iImg():
     def __init__(self, path):
@@ -14,11 +18,11 @@ corvY = 0.1
 imageDir = "./image/80x/"
 imagePaths = os.listdir(path=imageDir)
 
-neurons = [a.Neuron(80,80) for i in range(10)]
+neurons = np.array([a.Neuron(80,80, i) for i in range(10)])
 for i in range(10):
     neurons[i].vread(str(i) +'_V.txt')
 
-imgs = [iImg(imageDir + imgName) for imgName in imagePaths]
+imgs = np.array([iImg(imageDir + imgName) for imgName in imagePaths])
 print("Imgs download: success")
 
 loops = 0
@@ -29,12 +33,12 @@ while correcting != 0:
     correcting = 0
 
     for img in imgs:
-        for idx, neuron in enumerate(neurons):
+        for neuron in neurons:
             activ = neuron.activation(neuron.sum(img.matrx))
-            if img.shape == idx and activ < corvX:
+            if img.shape == neuron.shape and activ < corvX:
                 fn.corr(activ, corvX, img.matrx, neuron.vesa)
                 correcting += 1
-            elif img.shape != idx and activ > corvY:
+            elif img.shape != neuron.shape and activ > corvY:
                 fn.corr(activ, corvY, img.matrx, neuron.vesa)
                 correcting += 1
     loops += 1
@@ -64,3 +68,6 @@ while correcting != 0:
 
 for i in range(10):
     neurons[i].vwrite(str(i) +'_V.txt')
+
+end = time.time()
+print("Время работы: " + format(end-start) + " сек")
