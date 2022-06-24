@@ -1,31 +1,44 @@
-# from email.mime import image
 from operator import index
 import numpy as np
 from PIL import Image 
 
-image_number = 0
-alpha = 0.1
-
-SIZE = 80
-def readImage(path):
-    matrx = np.zeros((80,80))
+def readImage(path, size):
+    matrx = np.ones((size,size))
+    matrx = matrx*(-1)
     img = Image.open(path).load()
-    for i in range(SIZE):
-        for j in range(SIZE):
-            (r,g,b) = img[i,j]
-            matrx[i,j] = r*g*b / 16777216 # 2**24
+    for i in range(size):
+        for j in range(size):
+            if img[i,j] == (0):
+                matrx[i,j] = 1
     return matrx
 
-def corr(na, cv, img, ves):
-    delta = cv - na
-    for idx, value in np.ndenumerate(img):
-        if value != 0:
-            ves[idx] += alpha * delta * value
+def saveImg(m,f,size,f1):
+    img = Image.open(f1)
+    for i in range(size):
+        for j in range(size):
+            if m[i,j] == 1:
+                img.putpixel((i, j), (0))
+    img.save(f)
+                
+def activation (x):
+    if x > 0:
+        return 1
+    else: 
+        return -1
 
-def saveImg(m):
-    global image_number
-    filename = f'image_{image_number}.txt'
-    with open(filename, "w") as file:
-        for row in m:
-            file.write(' '.join(map(str, row)) + '\n') 
-    image_number += 1
+def recovery(n,w,g,f):
+
+    test = readImage((f),g)
+    test = test.reshape(n)
+    currImages = test
+
+    for _ in range(150):
+        test = np.array(currImages)
+        
+        for i in range(n):
+            sumT = np.sum(w[i] * test, axis=0)
+            currImages[i] = activation(sumT)
+
+        if (currImages == test).all():
+            break 
+    return currImages      

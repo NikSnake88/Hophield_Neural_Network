@@ -1,73 +1,70 @@
-from turtle import shape
 import functions as fn
-import Adam as a
 import numpy as np
-import os
 import time
+import os
 
-start = time.time()
+gridSize = 20
+inputNodes = gridSize*gridSize
 
-class iImg():
-    def __init__(self, path):
-        self.shape = int(path[-5])
-        self.matrx = fn.readImage(path)
+pathTest = "./Test/"
+pathTrain = "./Train/"
+pathDeTrain = "./deTrain/"
 
-corvX = 0.9
-corvY = 0.1
+listTest = os.listdir(path=pathTest)
+imgsTest = np.array([(fn.readImage((pathTest + imgName),gridSize)).reshape(inputNodes) for imgName in listTest])
 
-imageDir = "./image/80x/"
-imagePaths = os.listdir(path=imageDir)
+listTrain = os.listdir(path=pathTrain)
+imgsTrain = np.array([(fn.readImage((pathTrain + imgName),gridSize)).reshape(inputNodes) for imgName in listTrain])
+np.random.shuffle(imgsTrain)
 
-neurons = np.array([a.Neuron(80,80, i) for i in range(10)])
-for i in range(10):
-    neurons[i].vread(str(i) +'_V.txt')
+currImages = np.zeros(inputNodes)
+weights = np.zeros((inputNodes,inputNodes))
 
-imgs = np.array([iImg(imageDir + imgName) for imgName in imagePaths])
-print("Imgs download: success")
+def OBUCHENIE(weights):
+    for train in imgsTrain:
+        weights += np.outer(train, train)
+    np.fill_diagonal(weights, 0)
 
-loops = 0
-correcting = 1
-while correcting != 0:
 
-    np.random.shuffle(imgs)
-    correcting = 0
+def RAZOBUCHENIE(weights, detrain, e):
+    weights -= np.outer(detrain, detrain) * e
+    np.fill_diagonal(weights, 0)
 
-    for img in imgs:
-        for neuron in neurons:
-            activ = neuron.activation(neuron.sum(img.matrx))
-            if img.shape == neuron.shape and activ < corvX:
-                fn.corr(activ, corvX, img.matrx, neuron.vesa)
-                correcting += 1
-            elif img.shape != neuron.shape and activ > corvY:
-                fn.corr(activ, corvY, img.matrx, neuron.vesa)
-                correcting += 1
-    loops += 1
-    print(str(loops) + " " + str(correcting))
+def TEST(ex):
+    OBUCHENIE(weights)
+    i = True
+    start = time.time()
+    for test in listTest:
+        image_number = 0
+        while i == True:
+            res = fn.recovery(inputNodes,weights,gridSize,("./Test/" + test))
+            for train in imgsTrain:
+                if (res == train).all():
+                    fn.saveImg(res.reshape((gridSize,gridSize)),("./Fin/"+ test),gridSize, "./Fin/fin.bmp")
+                    i = False
+                    break
+            if i == True:
+                fn.saveImg(res.reshape((gridSize,gridSize)),("./deTrain/de"+str(image_number)+".bmp"),gridSize, "./deTrain/de.bmp")
+                RAZOBUCHENIE(weights,res, ex)
+                image_number += 1
+        i = True   
+    end = time.time()
+    print("epsilon: " + str(ex) + ", количество образов: " + str(len(imgsTest)) + ", время работы: " + format(end-start) + " сек")
 
-# for i in range(10):
-#     for j, imageName in enumerate(imagePaths):
-#         im = fn.readImage(imageDir + imageName)
-#         neuron = neurons[i].sum(im)
-#         activ = neurons[i].activation(neuron)
-#         #print("Nikita: " + str(neuron))
-#         #print("Anton: " + str(activ))
-#         if imageName[-5] == str(i):
-#             while activ < corvX:
-#                 fn.corr(activ, corvX, im, neurons[i].vesa)
-#                 neuron = neurons[i].sum(im)
-#                 activ = neurons[i].activation(neuron)
-#                 #print("Nikita: " + str(neuron))
-#                 #print("Anton: " + str(activ))
-#         else:
-#             while activ > corvY:
-#                 fn.corr(activ, corvY, im, neurons[i].vesa)
-#                 neuron = neurons[i].sum(im)
-#                 activ = neurons[i].activation(neuron)
-#                 #print("Nikita: " + str(neuron))
-#                 #print("Anton: " + str(activ))
+#TEST(0.03)
+def START(eps):
+    i = 0
+    OBUCHENIE(weights)
+    start = time.time()
+    while True:
+        res = fn.recovery(inputNodes,weights,gridSize,("./test.bmp"))
+        for train in imgsTrain:
+            if (res == train).all() or i == 300:
+                fn.saveImg(res.reshape((gridSize,gridSize)),("./Fin/fin1.bmp"),gridSize, "./Fin/fin.bmp")
+                end = time.time()
+                print("epsilon: " + str(eps) + ", время работы: " + format(end-start) + " сек")
+                exit(0)
+        RAZOBUCHENIE(weights, res,eps)
+        i += 1
 
-for i in range(10):
-    neurons[i].vwrite(str(i) +'_V.txt')
-
-end = time.time()
-print("Время работы: " + format(end-start) + " сек")
+START(0.01)
